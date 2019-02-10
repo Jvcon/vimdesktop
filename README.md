@@ -34,6 +34,3 @@ VimDesktop 的前身是 [linxinhong](http://git.oschina.net/linxinhong) 的 ViAT
 
 此版本包含 [VimDesktop 1](https://github.com/victorwoo/vimdesktop) 和 [VimDesktop 2](http://git.oschina.net/linxinhong/VimDesktop) 的全部功能。
 
-### 贡献及技术支持
-
-官方 QQ 群: 271105729 （QZ/VimD/TC/AHK）

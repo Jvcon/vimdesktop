@@ -10,6 +10,7 @@
     vim.SetAction("<Gen_NormalMode>", "浏览模式")
     vim.SetAction("<Gen_Toggle>", "启用/禁用vim热键(General插件)")
     vim.SetAction("<Reload>", "重新加载")
+    vim.SetAction("<Suspend>", "禁用")
     vim.SetAction("<WindowMoveDown>", "窗口移动到下方")
     vim.SetAction("<WindowMoveUp>", "窗口移动到上方")
     vim.SetAction("<WindowMoveLeft>", "窗口移动到左侧")
@@ -157,11 +158,14 @@ Gen_Toggle()
 cancelTooltip:
     Tooltip, , , , 19
 return
-<reload>:
-    reload
+<Reload>:
+    Reload
 return
 <Exit>:
     ExitApp
+return
+<Suspend>:
+    Suspend
 return
 <down>:
     send, {down}
@@ -270,7 +274,7 @@ FullScreen() {
         WinSet, Style, ^0xC40000, ahk_id %WindowID%
         WinMove, ahk_id %WindowID%, , 0, 0, A_ScreenWidth, A_ScreenHeight
         WindowState := 1 ", " WinPosX ", " WinPosY ", " WindowWidth ", " WindowHeight
-        ;Msgbox 再按一下刚刚的热键退出全屏
+        ;MsgBox 再按一下刚刚的热键退出全屏
     }
     FullScreenID[windowID] := WindowState
 }
@@ -937,29 +941,7 @@ return
 return
 
 <SearchInWeb>:
-    Run, https://www.baidu.com/s?wd=%clipboard%
-return
-
-<PrintScreenAndSave>:
-    if (RegExMatch(A_ThisHotkey, "i)!PrintScreen"))
-    {
-        Send, !{PrintScreen}
-    }
-    else
-    {
-        Send, {PrintScreen}
-    }
-
-    Run, mspaint
-    Loop, 5
-    {
-        if (WinActive("ahk_class MSPaintApp"))
-        {
-            Send, ^v^s
-            break
-        }
-        sleep 100
-    }
+    Run, cmd /c start https://www.baidu.com/s?wd=%Clipboard%, , Hide
 return
 
 <Test>:
@@ -971,25 +953,36 @@ TestFunction(arg)
     MsgBox, 参数：%arg%
 }
 
-/*
-<PrintScreenWindowAndSave>:
-    WinGetPos x, y, w, h, A
-    ScreenSnapshot(A_Temp "\vimd.tmp.png", x "|" y "|" w "|" h "|")
-    Fileselectfile, selectedFile, s16, 截图.png, 另存为, PNG图片(*.png)
+<PrintScreenAndSave>:
+    if (RegExMatch(A_ThisHotkey, "i)!PrintScreen"))
+    {
+        Send, !{PrintScreen}
+    }
+    else
+    {
+        Send, {PrintScreen}
+    }
+
+    sleep, 50
+
+    FileSelectFile, selectedFile, s16, 截图_%A_Now%.png, 另存为, 图片(*.png; *.jpg; *.gif; *.bmp)
 
     if (selectedFile == "")
     {
         return
     }
 
-    if (!RegExMatch(selectedFile,"i)\.png"))
-    {
-        selectedFile .= ".png"
-    }
-
-    FileMove, % A_Temp "\vimd.tmp.png", % selectedFile, 1
-
+    SaveImageFromClipboard(selectedFile)
 return
+
+SaveImageFromClipboard(filename)
+{
+    pToken := Gdip_Startup()
+    pBitmap := Gdip_CreateBitmapFromClipboard()
+    Gdip_SaveBitmapToFile(pBitmap, filename)
+    Gdip_DisposeImage(pBitmap)
+    Gdip_Shutdown(pToken)
+}
 
 ; ScreenSnapshot("FullScreen.png")
 ; ScreenSnapshot("Area_xywh.png", "10|20|200|200")
@@ -1001,7 +994,6 @@ ScreenSnapshot(filename, area := 0)
     Gdip_DisposeImage(pBitmap)
     Gdip_Shutdown(pToken)
 }
-*/
 
 SwitchIME(dwLayout)
 {
@@ -1045,10 +1037,10 @@ return
 return
 
 <RunZ>:
-    RunZPath := A_ScriptDir "\..\RunZ\RunZ.ahk"
+    RunZPath := A_ScriptDir "\..\RunZ\RunZ.exe"
     if (ini.config.runz_dir != "")
     {
-        RunZPath := ini.config.runz_dir "\RunZ.ahk"
+        RunZPath := ini.config.runz_dir "\RunZ.exe"
     }
 
     if (!FileExist(RunZPath))
@@ -1056,14 +1048,27 @@ return
         return
     }
 
-    if (FileExist(A_ScriptDir "\vimd.exe"))
-    {
-        Run, %A_ScriptDir%\vimd.exe "%RunZPath%"
-    }
-    else
-    {
-        Run, "%RunZPath%"
-    }
+    Run, "%RunZPath%"
+return
+
+<AppendClipboard>:
+    OldClipboard := Clipboard
+    Clipboard =
+    Send, ^c
+    ClipWait, 2
+    Clipboard := OldClipboard . Clipboard
+return
+
+<OpenBaiduNetdiskLink>:
+    Clipboard =
+    Send, ^c
+    ClipWait, 1
+
+    Result := StrSplit(RegExReplace(Clipboard, "(链接：|密码：|提取)"), " ")
+    Run, % Result[1]
+    Sleep, 2000
+    Send, % Result[2]
+    Send, {Enter}
 return
 
 ClickContextMenu(key)
@@ -1072,3 +1077,26 @@ ClickContextMenu(key)
     WinWait, ahk_class #32768
     Send, %key%
 }
+
+<RunAhkInClipboard>:
+    tmp_file := A_Temp "\tmpcode.ahk"
+    FileDelete, %tmp_file%
+    FileAppend, %Clipboard%, %tmp_file%
+    Run, %A_ScriptDir%\vimd.exe %tmp_file%
+return
+
+<SuspendMachine>:
+    DllCall("PowrProf\SetSuspendState", "int", 0, "int", 0, "int", 0)
+return
+
+<AlwaysOnTop>:
+    WinSet, AlwaysOnTop, on, A
+return
+
+<CancelAlwaysOnTop>:
+    WinSet, AlwaysOnTop, off, A
+return
+
+<ToggleTitleBar>:
+    WinSet, Style, ^0xC40000, A
+return

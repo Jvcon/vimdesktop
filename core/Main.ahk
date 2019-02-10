@@ -4,24 +4,33 @@ global ini
 global default_enable_show_info
 global editor
 global VIMD_CMD_LIST
-global WshShell
 
 VimdRun()
 {
-    ConfigPath := A_ScriptDir "\vimd.ini"
-    vim := class_vim()
-    ini := class_EasyINI(A_ScriptDir "\vimd.ini")
-    default_enable_show_info := ini.config.default_enable_show_info
-    editor := ini.config.editor
-    VIMD_CMD_LIST := []
+    CustomInit := "CustomInit"
+    if (IsLabel(CustomInit))
+    {
+        GoSub, %CustomInit%
+    }
 
-    ; 给 check.ahk 使用
-    IniWrite, %A_ScriptHwnd%, %A_Temp%\vimd_auto.ini, auto, hwnd
+    ConfigPath := A_ScriptDir "\conf\vimd.ini"
+    IniRead, CustomConfigPath, %ConfigPath%, config, custom_config_path
+    if (FileExist(A_ScriptDir "\conf\" CustomConfigPath))
+    {
+        ConfigPath := A_ScriptDir "\conf\" CustomConfigPath
+    }
+
+    vim := class_vim()
+    VIMD_CMD_LIST := []
 
     if (!FileExist(ConfigPath))
     {
-        FileCopy, %ConfigPath%.help.txt, %ConfigPath%
+        FileCopy, %A_ScriptDir%\conf\vimd.ini.help.txt, %ConfigPath%
     }
+
+    ini := class_EasyINI(ConfigPath)
+    default_enable_show_info := ini.config.default_enable_show_info
+    editor := ini.config.editor
 
     if (ini.config.enable_log == 1)
     {
@@ -40,28 +49,37 @@ VimdRun()
     CheckPlugin()
     CheckHotKey()
 
-    ; 用于接收来自 cehck.ahk 的信息
-    OnMessage(0x4a, "ReceiveWMCopyData")
+    ; 定时检查配置文件更新
+    SetTimer, WatchConfigFile, 2000
 }
 
 CheckPlugin()
 {
+    ExtensionsAHK := A_ScriptDir "\plugins\plugins.ahk"
+
     ; 检测是否有新增插件
     Loop, %A_ScriptDir%\plugins\*, 2, 0
     {
-        IniRead, PluginTime, %A_ScriptDir%\plugins\plugins.ahk, ExtensionsTime, %A_LoopFileName%
+        IniRead, PluginTime, %ExtensionsAHK%, ExtensionsTime, %A_LoopFileName%
         if (PluginTime = "ERROR")
         {
             MsgBox, 发现新插件 %A_LoopFileName%，将自动加载该插件
 
-            if (FileExist(A_ScriptDir "\vimd.exe"))
+            Filedelete, %ExtensionsAHK%
+
+            Loop, %A_ScriptDir%\plugins\*.*, 2
+                plugins .=  "#include *i `%A_ScriptDir`%\plugins\" A_LoopFileName "\" A_LoopFileName ".ahk`n"
+            FileAppend, %plugins%, %ExtensionsAHK%
+
+            SaveTime := "/*`r`n[ExtensionsTime]`r`n"
+            Loop, %A_ScriptDir%\plugins\*.*, 2
             {
-                Run, %A_ScriptDir%\vimd.exe "%A_ScriptDir%\plugins\check.ahk"
+                plugin :=  A_ScriptDir "\plugins\" A_LoopFileName "\" A_LoopFileName ".ahk"
+                FileGetTime, ExtensionsTime, %plugin%, M
+                SaveTime .= A_LoopFileName "=" ExtensionsTime "`r`n"
             }
-            else
-            {
-                Run, %A_ScriptDir%\plugins\check.ahk
-            }
+            SaveTime .= "*/`r`n"
+            FileAppend, %SaveTime%, %ExtensionsAHK%
 
             IniWrite, 1, %ConfigPath%, plugins, %A_LoopFileName%
             Reload
@@ -184,30 +202,8 @@ VIMD_CMD()
     }
     else if RegExMatch(VIMD_CMD_LIST[obj.keytemp], "i)^(wshkey)\|", m)
     {
-        /*
-        if (!WshShell)
-        {
-            WshShell := ComObjCreate("WScript.Shell")
-        }
-
-        WshShell.SendKeys(substr(VIMD_CMD_LIST[obj.keytemp], strlen(m1) + 2))
-        */
-
         SendLevel, 1
         Send, % substr(VIMD_CMD_LIST[obj.keytemp], strlen(m1) + 2)
-    }
-}
-
-ReceiveWMCopyData(wParam, lParam)
-{
-    ; 获取 CopyDataStruct 的 lpData 成员.
-    StringAddress := NumGet(lParam + 2 * A_PtrSize)
-    ; 从结构中复制字符串.
-    AHKReturn := StrGet(StringAddress)
-    if RegExMatch(AHKReturn, "i)reload")
-    {
-        Settimer, VIMD_Reload, 500
-        return true
     }
 }
 
@@ -215,19 +211,12 @@ VIMD_Reload:
     Reload
 return
 
-/*
-RunAsAdmin()
-{
-    local params, uacrep
-    Loop %0%
-        params .= " " (InStr(%A_Index%, " ") ? """" %A_Index% """" : %A_Index%)
-    if(A_IsCompiled)
-        uacrep := DllCall("shell32\ShellExecute", uint, 0, str, "RunAs", str, A_ScriptFullPath, str, "/r" params, str, A_WorkingDir, int, 1)
-    else
-        uacrep := DllCall("shell32\ShellExecute", uint, 0, str, "RunAs", str, A_AhkPath, str, "/r """ A_ScriptFullPath """" params, str, A_WorkingDir, int, 1)
-    if(uacrep = 42) ;UAC Prompt confirmed, application may run as admin
-        ExitApp
-    else
-        MsgBox 未能获取管理员权限，这可能导致部分功能无法运行。
-}
-*/
+WatchConfigFile:
+    FileGetTime, newConfigFileModifyTime, %ConfigPath%
+
+    if (lastConfigFileModifyTime != "" && lastConfigFileModifyTime != newConfigFileModifyTime)
+    {
+        GoSub, VIMD_Reload
+    }
+    lastConfigFileModifyTime := newConfigFileModifyTime
+return

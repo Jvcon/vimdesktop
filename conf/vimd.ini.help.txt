@@ -28,6 +28,8 @@ runz_dir=
 enable_log=0
 ; 打开调试窗口
 enable_debug=0
+; 自定义的配置文件路径，需要 .ini 扩展名，主要方便备份和升级
+;custom_config_path=vimd_custom.ini
 
 [exclude]
 vim
@@ -39,83 +41,12 @@ vim
 <w-e>=<TC_ToggleTC>
 ; 重新加载VimDesktop
 <w-y>=<Reload>
-;<prtsc>=<PrintScreenAndSave>
-;<a-printscreen>=<PrintScreenAndSave>
+<prtsc>=<PrintScreenAndSave>
+<a-printscreen>=<PrintScreenAndSave>
 
 ; 激活TC作为文件选择框，再次按下该快捷键可执行文件打开操作
 <w-o>=<TC_OpenTCDialog>
 <w-c>=run|explorer
-<w-j>=<RunZ>
-;<w-u>=run|..\RunZ\RunZ.ahk
-<w-`>=run|control
-;<w-f>=run|firefox
-;<w-q>=run|mintty -t " " -e zsh -l
-;<w-w>=run|mintty -t " " -e ssh -p 50248 127.0.0.1
-;<w-a>=run|c:\mine\app\foobar2000\foobar2000.exe
-;<w-v>=run|C:\ProgramData\Microsoft\Windows\Start Menu\Programs\为知笔记\为知笔记 Wiz.lnk
-;<w-z>=run|c:\mine\app\AutoHotkey\AU3_Spy.exe
-;<w-->=run|d:\book\AutoHotkey_Help_CN_v1.1.23.05.chm
-;<lc-;>=<enter>
-;<w-;>=<enter>
-
-; win剩余按键 n ' . / [ ] \ enter
-
-;<la-a>=key|^a
-; 向左移动一个单词
-;<la-b>=key|^{left}
-; 复制
-;<la-c>=key|^{insert}
-;<la-d>=<WindowRestore>
-;<la-e>=<SearchInWeb>
-;<la-f>=<FullScreen>
-; 第一行
-;<la-g>=key|^{home}
-;<la-h>=<left>
-;<la-i>=<home>
-;<la-j>=<down>
-;<la-k>=<up>
-;<la-l>=<right>
-;<la-m>=<WindowMax>
-;<la-n>=<pgdn>
-;<la-o>=<end>
-;<la-p>=<pgup>
-;<la-q>=key|!{f4}
-; 修改文件扩展名之外的部分
-;<la-r>=key|{f2}{f2}
-;<la-s>=key|^{tab}
-; 最后一行
-;<la-t>=key|^{end}
-;<la-u>=<CloseTab>
-; 粘贴
-;<la-v>=key|+{insert}
-; 向右移动一个单词
-;<la-w>=key|^{right}
-;<la-x>=key|^x
-;<la-y>=key|^y
-;<la-z>=key|^z
-;<la-1>=key|{Media_Play_Pause}
-;<la-2>=key|{Media_Next}
-;<la-3>=key|{Volume_Down}
-;<la-4>=key|{Volume_Up}
-;<la-5>=key|{Media_Prev}
-;<la-6>=key|{Volume_Mute}
-;<la-up>=<MouseUp>
-;<la-down>=<MouseDown>
-;<la-left>=<MouseLeft>
-;<la-right>=<MouseRight>
-;<la-backspace>=key|^{backspace}
-;<la-,>=<WindowMin>
-;<la-.>=key|{del}
-;<la-;>=key|{Enter}
-;<la-`>=<ToggleCapsLock>
-;<la-'>=<backspace>
-;<la-[>=key|(
-;<la-]>=key|)
-;<la-/>=key|@
-;<la-\>=key|^{del}
-;<la-->=<VimDConfig_Keymap>
-
-; la剩余按键 7-0
 
 ; 启用（1）/禁用（0） 插件，默认禁用
 [plugins]
@@ -126,7 +57,6 @@ TCDialog=1
 TCCompare=1
 BeyondCompare4=1
 Foobar2000=1
-WizNote=0
 VimDConfig=1
 MicrosoftExcel=1
 Explorer=1
@@ -148,11 +78,6 @@ Explorer=1
 ;l=<right>[=normal]
 ;<c-j>=run|notepad.exe
 ;<c-k>=key|^o
-
-;[Mintty]
-;set_class=mintty
-;set_file=mintty.exe
-;<esc>=<SwitchToEngIMEAndEsc>
 
 ;[Explorer]
 ;f=<Explorer_GotoTCX>
@@ -213,13 +138,19 @@ OpenFileDialogExclude = password , 密码
 a=<cm_SelectAll>
 b=<cm_UnpackFiles>
 c=<cm_MkDir>
+d=<TC_ListMark>
 e=<cm_edit>
 h=<TC_GoToParentEx>
 i=<TC_CreateNewFileNewStyle>
 l=<TC_SuperReturn>
+m=<TC_ThumbsView>
 o=<cm_ContextMenu>
 p=<cm_PackFiles>
 u=<cm_CloseCurrentTab>
+fa=<TC_CopyFileContents>
+ff=<TC_CopyNameOnly>
+zh=<TC_Toggle_50_100Percent>
+zz=<TC_Toggle_50_100Percent_V>
 <S-A>=<TC_ViewFileUnderCursor>
 <S-B>=<cm_DirBranch>
 <S-C>=<cm_IntCompareFilesByContent>
@@ -240,6 +171,7 @@ u=<cm_CloseCurrentTab>
 <c-f>=<pgdn>
 <c-g>=<cm_SetAttrib>
 <c-h>=<left>
+<c-i>=<TC_CreateBlankFileNoExt>
 <c-j>=<down>
 <c-k>=<up>
 <c-l>=<right>
@@ -247,17 +179,14 @@ u=<cm_CloseCurrentTab>
 <c-n>=<cm_FtpConnect>
 <c-q>=<TC_SelectCmd>
 <c-s>=<cm_CountDirContent>
+<c-t>=<cm_OpenDirInNewTab>
 <c-y>=<cm_CopyFileDetailsToClip>
-; c-t 未用
+<c-`>=<TC_ToggleShowInfo>
+,=<TC_Mark>
+.=function|TC_Run|explorer .
+<f9>=<TC_CopyUseQueues>
+<f10>=<TC_MoveUseQueues>
+<f11>=<cm_SwitchToPreviousTab>
+<f12>=<cm_SwitchToNextTab>
 ;"=<TC_MarkFile>
 ;_=<TC_UnMarkFile>
-;<esc>=<SwitchToEngIMEAndEsc>
-;zh=<TC_Toggle_50_100Percent>
-;zz=<TC_Toggle_50_100Percent_V>
-; 解压文件，e 是菜单对应的字母，下同
-;b=function|ClickContextMenu|e
-; 添加文件到压缩包
-;p=function|ClickContextMenu|a
-; 添加文件到压缩包，自动完成
-;<c-p>=function|ClickContextMenu|w
-;.=key|.{enter}

@@ -50,21 +50,32 @@
 
     if RegExMatch(TcPath, "i)totalcmd64\.exe$")
     {
+        Global TC64bit := True
+
         Global TCListBox := "LCLListBox"
-        Global TCEdit := "Edit2"
-        Global TInEdit := "TInEdit1"
+        ; 64 位的下方命令编辑框的 id 不固定，可能是 Edit1 或者 Edit2
+        Global TCEdit := "Edit1"
+        Global TInEdit := "Edit1"
         GLobal TCPanel1 := "Window1"
         Global TCPanel2 := "Window11"
-        Global TCPathPanel := "TPathPanel2"
+        Global TCPathPanel := "Window8"
+        Global TCPathPanelRight := "Window13"
     }
     else
     {
+        ; 左右面板
         Global TCListBox := "TMyListBox"
+        ; 底下命令编辑框
         Global TCEdit := "Edit1"
+        ; 重命名文件编辑框
         Global TInEdit := "TInEdit1"
+        ; 纵向分隔
         Global TCPanel1 := "TPanel1"
+        ; 横向分隔
         Global TCPanel2 := "TMyPanel8"
+        ; 左地址栏
         Global TCPathPanel := "TPathPanel1"
+        ; 右地址栏
         Global TCPathPanelRight := "TPathPanel2"
     }
 
@@ -82,15 +93,7 @@
 
             Loop, Parse, all_marks
             {
-                if (A_LoopField = ";")
-                {
-                    ; 因为ini文件里分号是注释，改成读加号，必须手动写配置
-                    IniRead, new_mark, %TCMarkINI%, mark, +
-                }
-                else
-                {
-                    IniRead, new_mark, %TCMarkINI%, mark, %A_LoopField%
-                }
+                IniRead, new_mark, %TCMarkINI%, mark, %A_LoopField%
 
                 Mark[A_LoopField] := new_mark
                 Menu, MarkMenu, Add, %new_mark%, <AddMark>
@@ -110,18 +113,18 @@
     vim.Comment("<TC_Mark>", "标记功能")
     vim.Comment("<TC_ForceDelete>", "强制删除")
     vim.Comment("<TC_ListMark>", "显示标记")
-    vim.Comment("<TC_Toggle_50_100Percent>", "切换当前窗口显示状态50%~100%")
-    vim.Comment("<TC_Toggle_50_100Percent_V>", "切换当前（纵向）窗口显示状态50%~100%")
+    vim.Comment("<TC_Toggle_50_100Percent>", "切换当前窗口显示状态 50% ~ 100% ")
+    vim.Comment("<TC_Toggle_50_100Percent_V>", "切换当前（纵向）窗口显示状态 50% ~ 100%")
     vim.Comment("<TC_WinMaxLeft>", "最大化左侧窗口")
     vim.Comment("<TC_WinMaxRight>", "最大化右侧窗口")
     vim.Comment("<TC_GoLastTab>", "切换到最后一个标签")
     vim.Comment("<TC_CopyNameOnly>", "只复制文件名，不含扩展名")
-    vim.Comment("<TC_GotoLine>", "移动到[count]行，默认第一行")
-    vim.Comment("<TC_LastLine>", "移动到[count]行，默认最后一行")
+    vim.Comment("<TC_GotoLine>", "移动到 [count] 行，默认第一行")
+    vim.Comment("<TC_LastLine>", "移动到 [count] 行，默认最后一行")
     vim.Comment("<TC_Half>", "移动到窗口中间行")
     vim.Comment("<TC_CreateNewFile>", "文件模板")
     vim.Comment("<TC_GoToParentEx>", "返回到上层文件夹，可返回到我的电脑")
-    vim.Comment("<TC_AlwayOnTop>", "设置TC顶置")
+    vim.Comment("<TC_AlwayOnTop>", "设置 TC 顶置")
     vim.Comment("<TC_OpenDriveThis>", "打开驱动器列表:本侧")
     vim.Comment("<TC_OpenDriveThat>", "打开驱动器列表:另侧")
     vim.Comment("<TC_MoveDirectoryHotlist>", "移动到常用文件夹")
@@ -131,9 +134,9 @@
     vim.Comment("<TC_SearchMode>", "连续搜索")
     vim.Comment("<TC_CopyUseQueues>", "无需确认，使用队列拷贝文件至另一窗口")
     vim.Comment("<TC_MoveUseQueues>", "无需确认，使用队列移动文件至另一窗口")
-    vim.Comment("<TC_ViewFileUnderCursor>", "使用查看器打开光标所在文件(shift+f3)")
-    vim.Comment("<TC_OpenWithAlternateViewer>", "使用外部查看器打开(alt+f3)")
-    vim.Comment("<TC_ToggleShowInfo>", "显示/隐藏 按键提示")
+    vim.Comment("<TC_ViewFileUnderCursor>", "使用查看器打开光标所在文件（shift + f3）")
+    vim.Comment("<TC_OpenWithAlternateViewer>", "使用外部查看器打开（alt + f3）")
+    vim.Comment("<TC_ToggleShowInfo>", "显示/隐藏: 按键提示")
     vim.Comment("<TC_ToggleMenu>", "显示/隐藏: 菜单栏")
     vim.Comment("<TC_SuperReturn>", "同回车键，但定位到第一个文件")
     vim.Comment("<TC_FileCopyForBak>", "将当前光标下的文件复制一份作为作为备份")
@@ -147,16 +150,19 @@
     vim.Comment("<TC_CreateFileShortcut>", "创建当前光标下文件的快捷方式")
     vim.Comment("<TC_CreateFileShortcutToDesktop>", "创建当前光标下文件的快捷方式并发送到桌面")
     vim.Comment("<TC_CreateFileShortcutToStartup>", "创建当前光标下文件的快捷方式并发送到启动文件里")
-    vim.Comment("<TC_FilterSearchFNsuffix_exe>", "在当前目录里快速过滤exe扩展名的文件")
+    vim.Comment("<TC_FilterSearchFNsuffix_exe>", "在当前目录里快速过滤 exe 扩展名的文件")
     vim.Comment("<TC_TwoFileExchangeName>", "两个文件互换文件名")
     vim.Comment("<TC_SelectCmd>", "选择命令来执行")
     vim.Comment("<TC_MarkFile>", "标记文件，将文件注释改成m")
     vim.Comment("<TC_UnMarkFile>", "取消文件标记，将文件注释清空")
-    vim.Comment("<TC_ClearTitle>", "将TC标题栏字符串设置为空")
+    vim.Comment("<TC_ClearTitle>", "将 TC 标题栏字符串设置为空")
     vim.Comment("<TC_ReOpenTab>", "重新打开之前关闭的标签页")
     vim.Comment("<TC_OpenDirsInFile>", "将光标所在的文件内容中的文件夹在新标签页依次打开")
     vim.Comment("<TC_CreateBlankFile>", "创建空文件")
+    vim.Comment("<TC_CreateBlankFileNoExt>", "创建无扩展名空文件")
     vim.Comment("<TC_PasteFileEx>", "粘贴文件，如果光标下为目录则粘贴进该目录")
+    vim.Comment("<TC_ThumbsView>", "缩略图试图，并且修改 h 和 l 为方向键")
+    vim.Comment("<TC_Restart>", "重启 TC")
 
     GoSub, TCCOMMAND
 
@@ -220,7 +226,7 @@
     vim.map("d", "<cm_DirectoryHotlist>", "TTOTAL_CMD")
     vim.map("D", "<cm_OpenDesktop>", "TTOTAL_CMD")
     vim.map("e", "<cm_ContextMenu>", "TTOTAL_CMD")
-    vim.map("E", "<cm_ExeCuteDOS>", "TTOTAL_CMD")
+    vim.map("E", "<cm_ExecuteDOS>", "TTOTAL_CMD")
     vim.map("n", "<TC_azHistory>", "TTOTAL_CMD")
     vim.map("m", "<TC_Mark>", "TTOTAL_CMD")
     vim.map("M", "<TC_Half>", "TTOTAL_CMD")
@@ -252,7 +258,7 @@
     vim.map("-", "<cm_SwitchSeparateTree>", "TTOTAL_CMD")
     vim.map("=", "<cm_MatchSrc>", "TTOTAL_CMD")
     vim.map(",", "<cm_SrcThumbs>", "TTOTAL_CMD")
-    vim.map(";", "<TC_ListMark>", "TTOTAL_CMD")
+    vim.map(";", "<cm_DirectoryHotlist>", "TTOTAL_CMD")
     vim.map(":", "<cm_FocusCmdLine>", "TTOTAL_CMD")
     vim.map("~", "<cm_SysInfo>", "TTOTAL_CMD")
     vim.map("``", "<TC_ToggleShowInfo>", "TTOTAL_CMD")
@@ -507,7 +513,7 @@ TC_azHistory()
     {
         idx := RegExReplace(A_LoopField, "=.*$")
         value := RegExReplace(A_LoopField, "^\d\d?=")
-        ;避免&被识别成快捷键
+        ; 避免&被识别成快捷键
         name := StrReplace(value, "&", ":＆:")
         if RegExMatch(Value, "::\{20D04FE0\-3AEA\-1069\-A2D8\-08002B30309D\}\|")
         {
@@ -544,7 +550,8 @@ TC_azHistory()
             name := RegExReplace(Value, "::\{645FF040\-5081\-101B\-9F08\-00AA002F954E\}\|")
             value := 2127
         }
-        name .= A_Tab "[&"  chr(idx+65) "]"
+
+        name := RegExReplace(name, "`t#.*$") A_Tab "[&"  chr(idx+65) "]"
         history_obj[idx] := name
         history_name_obj[name] := value
     }
@@ -587,6 +594,12 @@ azHistorySelect()
     {
         ThisMenuItem := RegExReplace(A_ThisMenuItem, "\t.*$")
         ThisMenuItem := StrReplace(ThisMenuItem, ":＆:", "&")
+
+        if (TC64bit)
+        {
+            FixTCEditId()
+        }
+
         ControlSetText, %TCEdit%, cd %ThisMenuItem%, ahk_class TTOTAL_CMD
         ControlSend, %TCEdit%, {enter}, ahk_class TTOTAL_CMD
         ControlGetFocus, Ctrl, AHK_CLASS TTOTAL_CMD
@@ -723,6 +736,12 @@ TC_Mark()
     vim.mode("insert")
     GoSub, <cm_FocusCmdLine>
     ControlGet, EditId, Hwnd, , AHK_CLASS TTOTAL_CMD
+
+    if (TC64bit)
+    {
+        FixTCEditId()
+    }
+
     ControlSetText, %TCEdit%, m, AHK_CLASS TTOTAL_CMD
     Postmessage, 0xB1, 2, 2, %TCEdit%, AHK_CLASS TTOTAL_CMD
     SetTimer, <MarkTimer>, 100
@@ -733,6 +752,12 @@ return
 MarkTimer()
 {
     ControlGetFocus, ThisControl, AHK_CLASS TTOTAL_CMD
+
+    if (TC64bit)
+    {
+        FixTCEditId()
+    }
+
     ControlGetText, OutVar, %TCEdit%, AHK_CLASS TTOTAL_CMD
     Match_TCEdit := "i)^" . TCEdit . "$"
     if Not RegExMatch(ThisControl, Match_TCEdit) OR Not RegExMatch(Outvar, "i)^m.?")
@@ -829,6 +854,12 @@ AddMark()
         Postmessage 1075, 2127, 0, , ahk_class TTOTAL_CMD
         return
     }
+
+    if (TC64bit)
+    {
+        FixTCEditId()
+    }
+
     ControlSetText, %TCEdit%, cd %ThisMenuItem%, ahk_class TTOTAL_CMD
     ControlSend, %TCEdit%, {Enter}, ahk_class TTOTAL_CMD
     ControlGetFocus, Ctrl, AHK_CLASS TTOTAL_CMD
@@ -924,8 +955,14 @@ FileTempMenuCheckNewStyle()
         if A_Index = 1
             Menu, FileTemp, Add
         ft := SubStr(A_LoopFileName, 1, 1) . " >> " . A_LoopFileName
-        ;ft := chr(64+A_Index) . " >> " . A_LoopFileName
         Menu, FileTemp, Add, %ft%, FileTempNew
+
+        if FileExist(TCDir "\shellnew\icons\" A_LoopFileExt ".ico")
+        {
+            Menu, FileTemp, Icon, %ft%, % TCDir "\shellnew\icons\" A_LoopFileExt ".ico"
+            continue
+        }
+
         Ext := "." . A_LoopFileExt
         IconFile := RegGetNewFileIcon(Ext)
         IconFile := RegExReplace(IconFile, "i)%systemroot%", A_WinDir)
@@ -998,16 +1035,21 @@ return
 NewFile:
     NewFile()
 return
-NewFile(File = "", Blank := False)
+NewFile(File = "", Blank := False, Ext := "txt")
 {
     Global NewFile
     if Not File
         File := RegExReplace(NewFiles[A_ThisMenuItemPos], "(.*\[|\]$)", "")
     if (Blank)
     {
-        FileName := "New.txt"
-        FileNamenoext := "New"
-        FileExt := "txt"
+        FileName := "New"
+        FileNameNoExt := "New"
+        FileExt := Ext
+
+        if (Ext != "")
+        {
+            FileName .= "." Ext
+        }
     }
     else if Not FileExist(File)
     {
@@ -1020,7 +1062,7 @@ NewFile(File = "", Blank := False)
             FileExt := RegExReplace(NewFiles[A_ThisMenuItemPos], "(.*\(|\).*)")
             File := "New" . FileExt
             FileName := "New" . FileExt
-            FileNamenoext := "New"
+            FileNameNoExt := "New"
         }
     }
     else
@@ -1038,6 +1080,10 @@ NewFile(File = "", Blank := False)
         Controlget, nf, hwnd, , edit2, A
         PostMessage, 0x0B1, 0, Strlen(filenamenoext), Edit2, A
     }
+    return
+
+    GuiEscape:
+        Gui, Destroy
     return
 }
 ; 关闭新建文件窗口
@@ -1292,9 +1338,9 @@ LeftRight()
 ;<TC_OpenDriveThis>: >>打开驱动器列表:本侧{{{2
 <TC_OpenDriveThis>:
     ControlGetFocus, CurrentFocus, AHK_CLASS TTOTAL_CMD
-    if CurrentFocus not in TMyListBox2, TMyListBox1
+    if CurrentFocus not in %TCListBox%2, %TCListBox%1
         return
-    if CurrentFocus in TMyListBox2
+    if CurrentFocus in %TCListBox%2
         SendPos(131)
     else
         SendPos(231)
@@ -1303,9 +1349,9 @@ return
 ;<TC_OpenDriveThat>: >>打开驱动器列表:另侧{{{2
 <TC_OpenDriveThat>:
     ControlGetFocus, CurrentFocus, AHK_CLASS TTOTAL_CMD
-    if CurrentFocus not in TMyListBox2, TMyListBox1
+    if CurrentFocus not in %TCListBox%2, %TCListBox%1
         return
-    if CurrentFocus in TMyListBox2
+    if CurrentFocus in %TCListBox%2
         SendPos(231)
     else
         SendPos(131)
@@ -1314,12 +1360,12 @@ return
 ;<DirectoryHotlistother>: >>常用文件夹:另一侧{{{2
 <DirectoryHotlistother>:
     ControlGetFocus, CurrentFocus, AHK_CLASS TTOTAL_CMD
-    if CurrentFocus not in TMyListBox2, TMyListBox1
+    if CurrentFocus not in %TCListBox%2, %TCListBox%1
         return
-    if CurrentFocus in TMyListBox2
-        otherlist = TMyListBox1
+    if CurrentFocus in %TCListBox%2
+        otherlist = %TCListBox%1
     else
-        otherlist = TMyListBox2
+        otherlist = %TCListBox%2
     ControlFocus, %otherlist% , ahk_class TTOTAL_CMD
     SendPos(526)
     SetTimer WaitMenuPop3
@@ -1347,12 +1393,12 @@ return
 ;<TC_CopyDirectoryHotlist>: >>复制到常用文件夹{{{2
 <TC_CopyDirectoryHotlist>:
     ControlGetFocus, CurrentFocus, AHK_CLASS TTOTAL_CMD
-    if CurrentFocus not in TMyListBox2, TMyListBox1
+    if CurrentFocus not in %TCListBox%2, %TCListBox%1
         return
-    if CurrentFocus in TMyListBox2
-        otherlist = TMyListBox1
+    if CurrentFocus in %TCListBox%2
+        otherlist = %TCListBox%1
     else
-        otherlist = TMyListBox2
+        otherlist = %TCListBox%2
     ControlFocus, %otherlist% , ahk_class TTOTAL_CMD
     SendPos(526)
     SetTimer WaitMenuPop1
@@ -1395,12 +1441,12 @@ return
 <TC_MoveDirectoryHotlist>:
     if SendPos(0)
         ControlGetFocus, CurrentFocus, AHK_CLASS TTOTAL_CMD
-    if CurrentFocus not in TMyListBox2, TMyListBox1
+    if CurrentFocus not in %TCListBox%2, %TCListBox%1
         return
-    if CurrentFocus in TMyListBox2
-        otherlist = TMyListBox1
+    if CurrentFocus in %TCListBox%2
+        otherlist = %TCListBox%1
     else
-        otherlist = TMyListBox2
+        otherlist = %TCListBox%2
     ControlFocus, %otherlist% , ahk_class TTOTAL_CMD
     SendPos(526)
     SetTimer WaitMenuPop2
@@ -1480,14 +1526,15 @@ return
 Totalcomander_select_tcdir()
 {
     FileSelectFolder, tcdir, , 0, 打开TC安装目录
+
     GuiControl, , Edit1, %tcdir%
 }
 
 ; 切换当前（纵向）窗口显示状态50%~100%"
 <TC_Toggle_50_100Percent>:
-    ControlGetPos, , , wp, hp, TPanel1, ahk_class TTOTAL_CMD
-    ControlGetPos, , , w1, h1, TMyListBox1, ahk_class TTOTAL_CMD
-    ControlGetPos, , , w2, h2, TMyListBox2, ahk_class TTOTAL_CMD
+    ControlGetPos, , , wp, hp, %TCPanel1%, ahk_class TTOTAL_CMD
+    ControlGetPos, , , w1, h1, %TCListBox%1, ahk_class TTOTAL_CMD
+    ControlGetPos, , , w2, h2, %TCListBox%2, ahk_class TTOTAL_CMD
     if (wp < hp)
     {
         ;纵向
@@ -1509,9 +1556,9 @@ return
 ; 切换当前（纵向）窗口显示状态50%~100%"
 ; 横向分割的窗口使用 TC_Toggle_50_100Percent 即可
 <TC_Toggle_50_100Percent_V>:
-    ControlGetPos, , , wp, hp, TPanel1, ahk_class TTOTAL_CMD
-    ControlGetPos, , , w1, h1, TMyListBox1, ahk_class TTOTAL_CMD
-    ControlGetPos, , , w2, h2, TMyListBox2, ahk_class TTOTAL_CMD
+    ControlGetPos, , , wp, hp, %TCPanel1%, ahk_class TTOTAL_CMD
+    ControlGetPos, , , w1, h1, %TCListBox%1, ahk_class TTOTAL_CMD
+    ControlGetPos, , , w2, h2, %TCListBox%2, ahk_class TTOTAL_CMD
     if (wp < hp)  ;纵向
     {
         if (abs(w1 - w2) > 2)
@@ -1579,11 +1626,11 @@ return
         IniWrite, 0, %TCINI%, Configuration, RestrictInterface
 
         WinClose, AHK_CLASS TTOTAL_CMD
-        Sleep, 50
 
-        Run, %TCPath%
         Loop, 4
         {
+            Sleep, 50
+            Run, %TCPath%
             IfWinNotActive, AHK_CLASS TTOTAL_CMD
                 WinActivate, AHK_CLASS TTOTAL_CMD
             else
@@ -1596,15 +1643,21 @@ return
 <TC_SuperReturn>:
     ControlGetText, old_pwd_left, %TCPathPanel%, AHK_CLASS TTOTAL_CMD
     ControlGetText, old_pwd_right, %TCPathPanelRight%, AHK_CLASS TTOTAL_CMD
-    GoSub, <cm_Return>
-    sleep, 10
-    ControlGetText, new_pwd_left, %TCPathPanel%, AHK_CLASS TTOTAL_CMD
-    ControlGetText, new_pwd_right, %TCPathPanelRight%, AHK_CLASS TTOTAL_CMD
 
-    if (old_pwd_left != new_pwd_left || old_pwd_right != new_pwd_right)
+    GoSub, <cm_Return>
+
+    Loop, 5
     {
-        ControlGetFocus, Ctrl, AHK_CLASS TTOTAL_CMD
-        Postmessage, 0x19E, 1, 1, %Ctrl%, AHK_CLASS TTOTAL_CMD
+        ControlGetText, new_pwd_left, %TCPathPanel%, AHK_CLASS TTOTAL_CMD
+        ControlGetText, new_pwd_right, %TCPathPanelRight%, AHK_CLASS TTOTAL_CMD
+
+        if (old_pwd_left != new_pwd_left || old_pwd_right != new_pwd_right)
+        {
+            GoSub, <cm_GoToFirstEntry>
+            return
+        }
+
+        Sleep, 10
     }
 return
 
@@ -1710,6 +1763,12 @@ Return
         FileMove, %dir%\%name_no_ext%.lnk, %USERPROFILE%\desktop\
 
         ; 如果不想打开桌面目录的话，注释以下4行
+
+        if (TC64bit)
+        {
+            FixTCEditId()
+        }
+
         ControlSetText, %TCEdit%, cd %USERPROFILE%\desktop\, ahk_class TTOTAL_CMD
         ControlSend, %TCEdit%, {enter}, ahk_class TTOTAL_CMD
         ControlGetFocus, Ctrl, AHK_CLASS TTOTAL_CMD
@@ -1727,6 +1786,11 @@ Return
         ; MsgBox, %Clipboard%
         FileCreateShortcut, %Clipboard%, %dir%\%name_no_ext%.lnk
         FileMove, %dir%\%name_no_ext%.lnk, %appdata%\Microsoft\Windows\Start Menu\Programs\Startup\
+
+        if (TC64bit)
+        {
+            FixTCEditId()
+        }
 
         ; 如果不想打开启动目录的话，注释以下4行
         ControlSetText, %TCEdit%, cd %appdata%\Microsoft\Windows\Start Menu\Programs\Startup\, ahk_class TTOTAL_CMD
@@ -1850,8 +1914,17 @@ return
     NewFile("创建空文件", True)
 return
 
+<TC_CreateBlankFileNoExt>:
+    NewFile("创建空文件", True, "")
+return
+
 TC_Run(cmd)
 {
+    if (TC64bit)
+    {
+        FixTCEditId()
+    }
+
     ControlSetText, %TCEdit%, %cmd%, ahk_class TTOTAL_CMD
     ControlSend, %TCEdit%, {Enter}, ahk_class TTOTAL_CMD
 }
@@ -1876,6 +1949,53 @@ TC_Run(cmd)
     }
     OldClipboard =
 return
+
+; 缩略图视图，并且临时修改 h 和 l 按键为左右方向键
+<TC_ThumbsView>:
+    GoSub, <cm_SrcThumbs>
+
+    GoSub, <TC_ThumbsViewSwitchKey>
+return
+
+<TC_ThumbsViewSwitchKey>:
+    InThumbsView := !(InThumbsView)
+    if (InThumbsView) {
+        vim.map("h", "<left>", "TTOTAL_CMD")
+        vim.map("l", "<right>", "TTOTAL_CMD")
+    } else {
+        vim.map("h", "<TC_GoToParentEx>", "TTOTAL_CMD")
+        vim.map("l", "<TC_SuperReturn>", "TTOTAL_CMD")
+    }
+return
+
+FixTCEditId()
+{
+    ControlGetText, Result, Edit2, ahk_class TTOTAL_CMD
+    if (ErrorLevel)
+    {
+        TCEdit := "Edit1"
+    }
+    else
+    {
+        TCEdit := "Edit2"
+    }
+}
+
+<TC_Restart>:
+    WinClose, AHK_CLASS TTOTAL_CMD
+
+    Loop, 4
+    {
+        Sleep, 100
+        Run, %TCPath%
+        Sleep, 50
+        IfWinNotActive, AHK_CLASS TTOTAL_CMD
+            WinActivate, AHK_CLASS TTOTAL_CMD
+        else
+            Break
+    }
+return
+
 
 ; ADD HERE
 
@@ -2125,6 +2245,7 @@ TCCOMMAND:
     vim.Comment("<cm_TransferRight>", "在右窗口打开光标处的文件夹或压缩包")
     vim.Comment("<cm_EditPath>", "编辑来源窗口的路径")
     vim.Comment("<cm_GoToFirstFile>", "光标移到列表中的第一个文件")
+    vim.Comment("<cm_GoToFirstEntry>", "光标移到列表中的第一个文件或目录")
     vim.Comment("<cm_GotoNextDrive>", "转到下一个驱动器")
     vim.Comment("<cm_GotoPreviousDrive>", "转到上一个驱动器")
     vim.Comment("<cm_GotoNextSelected>", "转到下一个选中的文件")
@@ -2340,6 +2461,8 @@ TCCOMMAND:
     vim.Comment("<cm_LoadAllOnDemandFields>", "所有文件都按需加载备注")
     vim.Comment("<cm_LoadSelOnDemandFields>", "仅选中的文件按需加载备注")
     vim.Comment("<cm_ContentStopLoadFields>", "停止后台加载备注")
+    vim.Comment("<cm_FocusSrc>", "光标切换至源面板")
+    vim.Comment("<cm_FocusTrg>", "光标切换至目标面板")
 return
 SendPos(Number)
 {
@@ -2422,7 +2545,7 @@ return
 return
 ;<cm_SrcThumbs>: >>来源窗口: 缩略图{{{2
 <cm_SrcThumbs>:
-    SendPos(269    )
+    SendPos(269)
 return
 ;<cm_SrcCustomViewMenu>: >>来源窗口: 自定义视图菜单{{{2
 <cm_SrcCustomViewMenu>:
@@ -4209,4 +4332,16 @@ return
 ;<cm_ContentStopLoadFields>: >>停止后台加载备注{{{2
 <cm_ContentStopLoadFields>:
     SendPos(5514)
+return
+;<cm_GoToFirstEntry>: >>光标移到列表中的第一个文件或目录{{{2
+<cm_GoToFirstEntry>:
+    SendPos(2049)
+return
+;<cm_FocusSrc>: >>光标切换至源面板{{{2
+<cm_FocusSrc>:
+    SendPos(4005)
+return
+;<cm_FocusTrg>: >>光标切换至目标面板{{{2
+<cm_FocusTrg>:
+    SendPos(4006)
 return
