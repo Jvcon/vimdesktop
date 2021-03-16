@@ -80,7 +80,7 @@ ShowInfo()
         if (act.Type = 1)
         {
             ActionDescList := act.Comment
-            np .= key "`t" %ActionDescList%[Key] "`n"
+            np .= key "`t" %ActionDescList%[vim.LastFoundWin "#" Key] "`n"
         }
         else
         {
@@ -196,9 +196,22 @@ Class __vim
             rw := this.WinList[winName]
         else
             rw := this.WinList[winName] := new __win(class, filepath, title)
-        this.WinInfo["class`t"class]       := winName
-        this.WinInfo["filepath`t"filepath] := winName
-        this.WinInfo["title`t"title]       := winName
+
+        if (class != "")
+        {
+            this.WinInfo["class`t"class]       := winName
+        }
+
+        if (filepath != "")
+        {
+            this.WinInfo["filepath`t"filepath] := winName
+        }
+
+        if (title != "")
+        {
+            this.WinInfo["title`t"title]       := winName
+        }
+
         return rw
     }
 
@@ -665,7 +678,7 @@ Class __vim
             if strlen(actionName := modeObj.GetKeymap(winObj.LastKey))
             {
                 actObj := this.GetAction(actionName)
-                __vimLastAction := {"LastKey":k, "winName":winName, "ActionName":ActionName, "KeyTemp":winObj.KeyTemp, "Count":winObj.Count}
+                __vimLastAction := {"LastKey":k, "WinName":winName, "ActionName":ActionName, "KeyTemp":winObj.KeyTemp, "Count":winObj.Count}
                 actObj.Do(winObj.Count)
                 winObj.Count := 0
             }
@@ -697,7 +710,7 @@ Class __vim
         if act
         {
             winObj.HideMore()
-            __vimLastAction := {"LastKey":k, "winName":winName, "ActionName":ActionName, "KeyTemp":winObj.KeyTemp, "Count":winObj.Count}
+            __vimLastAction := {"LastKey":k, "WinName":winName, "ActionName":ActionName, "KeyTemp":winObj.KeyTemp, "Count":winObj.Count}
             act.Do(winObj.Count)
             winObj.Count := 0
             winObj.KeyTemp := ""
@@ -733,17 +746,17 @@ Class __vim
     {
         if RegExMatch(key, "^[A-Z]$")
             return "<S-" this.Upper(key) ">"
-        if RegExMatch(key, "i)^((F1)|(F2)|(F3)|(F4)|(F5)|(F6)|(F7)|(F8)|(F9)|(F10)|(F11)|(F12))$")
+        if RegExMatch(key, "i)^(F[0-9]{1,2}|Numpad.*)$")
             return "<" key ">"
-        if RegExMatch(key, "i)^((AppsKey)|(Tab)|(Enter)|(Space)|(Home)|(End)|(CapsLock)|(ScrollLock)|(Up)|(Down)|(Left)|(Right)|(PgUp)|(PgDn)|(Pause))$")
+        if RegExMatch(key, "i)^(AppsKey|Tab|Enter|Space|Home|End|CapsLock|ScrollLock|Up|Down|Left|Right|PgUp|PgDn|Pause)$")
             return "<" key ">"
-        if RegExMatch(key, "i)^((BS)|(BackSpace))$")
+        if RegExMatch(key, "i)^(BS|BackSpace)$")
             return "<BS>"
-        if RegExMatch(key, "i)^((Esc)|(Escape))$")
+        if RegExMatch(key, "i)^(Esc|Escape)$")
             return "<Esc>"
-        if RegExMatch(key, "i)^((Ins)|(Insert))$")
+        if RegExMatch(key, "i)^(Ins|Insert)$")
             return "<Insert>"
-        if RegExMatch(key, "i)^((Del)|(Delete))$")
+        if RegExMatch(key, "i)^(Del|Delete)$")
             return "<Delete>"
         if RegExMatch(key, "i)^PrintScreen$")
             return "<PrtSc>"
@@ -754,21 +767,21 @@ Class __vim
         if RegExMatch(key, "i)^rshift\s&\s(.*)", m) or RegExMatch(key, "^>\+(.*)", m)
             return "<RS-" this.Upper(m1) ">"
         if RegExMatch(key, "i)^Ctrl\s&\s(.*)", m) or RegExMatch(key, "^\^(.*)", m)
-            return "<C-" this.Upper(m1) ">"
+            return "<c-" m1 ">"
         if RegExMatch(key, "i)^lctrl\s&\s(.*)", m) or RegExMatch(key, "^<\^(.*)", m)
-            return "<LC-" this.Upper(m1) ">"
+            return "<lc-" m1 ">"
         if RegExMatch(key, "i)^rctrl\s&\s(.*)", m) or RegExMatch(key, "^>\^(.*)", m)
-            return "<RC-" this.Upper(m1) ">"
+            return "<rc-" m1 ">"
         if RegExMatch(key, "i)^alt\s&\s(.*)", m) or RegExMatch(key, "^\!(.*)", m)
-            return "<A-" this.Upper(m1) ">"
+            return "<a-" m1 ">"
         if RegExMatch(key, "i)^lalt\s&\s(.*)", m) or RegExMatch(key, "^<\!(.*)", m)
-            return "<LA-" this.Upper(m1) ">"
+            return "<la-" m1 ">"
         if RegExMatch(key, "i)^ralt\s&\s(.*)", m) or RegExMatch(key, "^>\!(.*)", m)
-            return "<RA-" this.Upper(m1) ">"
+            return "<ra-" m1 ">"
         if RegExMatch(key, "i)^lwin\s&\s(.*)", m) or RegExMatch(key, "^#(.*)", m)
-            return "<W-" this.Upper(m1) ">"
+            return "<w-" m1 ">"
         if RegExMatch(key, "i)^space\s&\s(.*)", m)
-            return "<SP-" this.Upper(m1) ">"
+            return "<sp-" m1 ">"
         if RegExMatch(key, "i)^alt$")
             return "<Alt>"
         if RegExMatch(key, "i)^ctrl$")
@@ -795,9 +808,9 @@ Class __vim
         if RegExMatch(key, "^<.*>$")
         {
             key := SubStr(key, 2, strlen(key)-2)
-            if RegExMatch(key, "i)^((F1)|(F2)|(F3)|(F4)|(F5)|(F6)|(F7)|(F8)|(F9)|(F10)|(F11)|(F12))$")
+            if RegExMatch(key, "i)^(F[0-9]{1,2}|Numpad.*)$")
                 return ToSend ? "{" key "}" : key
-            if RegExMatch(key, "i)^((AppsKey)|(Tab)|(Enter)|(Space)|(Home)|(End)|(CapsLock)|(ScrollLock)|(Up)|(Down)|(Left)|(Right)|(PgUp)|(PgDn)|(BS)|(ESC)|(Insert)|(Delete)|(Pause))$")
+            if RegExMatch(key, "i)^(AppsKey|Tab|Enter|Space|Home|End|CapsLock|ScrollLock|Up|Down|Left|Right|PgUp|PgDn|BS|ESC|Insert|Delete|Pause)$")
                 return ToSend ? "{" key "}" : key
             if RegExMatch(key, "i)^PrtSc$")
                 return ToSend ? "{PrintScreen}" : "PrintScreen"
@@ -816,22 +829,23 @@ Class __vim
             if RegExMatch(key, "i)^S\-(.*)", m)
                 return ToSend ? "+" this.CheckToSend(m1) : "+" m1 
             if RegExMatch(key, "i)^LS\-(.*)", m)
-                return ToSend ? "<+" this.CheckToSend(m1) : "<+" m1
+                return ToSend ? "+" this.CheckToSend(m1) : "<+" m1
             if RegExMatch(key, "i)^RS-(.*)", m)
-                return ToSend ? ">+" this.CheckToSend(m1) : ">+" m1
+                return ToSend ? "+" this.CheckToSend(m1) : ">+" m1
             if RegExMatch(key, "i)^C\-(.*)", m)
                 return ToSend ? "^" this.CheckToSend(m1) : "^" m1
             if RegExMatch(key, "i)^LC\-(.*)", m)
-                return ToSend ? "<^" this.CheckToSend(m1) : "<^" m1
+                return ToSend ? "^" this.CheckToSend(m1) : "<^" m1
             if RegExMatch(key, "i)^RC\-(.*)", m)
-                return ToSend ? ">^" this.CheckToSend(m1) : ">^" m1
+                return ToSend ? "^" this.CheckToSend(m1) : ">^" m1
             if RegExMatch(key, "i)^A\-(.*)", m)
                 return ToSend ? "!" this.CheckToSend(m1) : "!" m1
             if RegExMatch(key, "i)^LA\-(.*)", m)
-                ; 这里有问题，先不处理
-                return ToSend ? "<!" this.CheckToSend(m1) : "<!" m1
+                ; 暂时先不区分左右键
+                return ToSend ? "!" this.CheckToSend(m1): "<!" m1
+                ;return ToSend ? "{lalt down}" this.CheckToSend(m1) "{lalt up}": "<!" m1
             if RegExMatch(key, "i)^RA\-(.*)", m)
-                return ToSend ? ">!" this.CheckToSend(m1) : ">!" m1
+                return ToSend ? "!" this.CheckToSend(m1) : ">!" m1
             if RegExMatch(key, "i)^w\-(.*)", m)
                 return ToSend ? "#" this.CheckToSend(m1) : "#" m1
             if RegExMatch(key, "i)^SP\-(.*)", m)
@@ -843,9 +857,9 @@ Class __vim
 
     CheckToSend(key)
     {
-        if RegExMatch(key, "i)^((F1)|(F2)|(F3)|(F4)|(F5)|(F6)|(F7)|(F8)|(F9)|(F10)|(F11)|(F12))$")
+        if RegExMatch(key, "i)^(F[0-9]{1,2}|Numpad.*)$")
             return "{" key "}" 
-        if RegExMatch(key, "i)^((AppsKey)|(Tab)|(Enter)|(Space)|(Home)|(End)|(CapsLock)|(ScrollLock)|(Up)|(Down)|(Left)|(Right)|(PgUp)|(PgDn)|(BS)|(ESC)|(Insert)|(Delete)|(Pause))$")
+        if RegExMatch(key, "i)^(AppsKey|Tab|Enter|Space|Home|End|CapsLock|ScrollLock|Up|Down|Left|Right|PgUp|PgDn|BS|ESC|Insert|Delete|Pause)$")
             return "{" key "}"
         if RegExMatch(key, "i)^PrtSc$")
             return "{PrintScreen}"
